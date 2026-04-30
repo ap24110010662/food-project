@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>RouteDash — Kurnool Food Delivery Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --brand:#FF6B2C;--brand-dark:#C94A0E;--brand-dim:#3A1800;
+  --bg:#0C0C0D;--surf:#161618;--surf2:#1F1F22;--surf3:#28282C;
+  --border:#2A2A2E;--border2:#363639;
+  --text:#F0EEE8;--muted:#7A7A82;--muted2:#555558;
+  --green:#2ECC71;--blue:#4A9EE0;--amber:#F0A500;--red:#E05050;
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;}
+
+/* ── HEADER ── */
+.header{background:var(--surf);border-bottom:1px solid var(--border);padding:0 1.5rem;height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:200;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:34px;height:34px;background:var(--brand);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.logo-txt{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);}
+.logo-txt span{color:var(--brand);}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.notif-btn{position:relative;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background .15s;}
+.notif-btn:hover{background:var(--surf3);}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--surf);}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px 5px 5px;cursor:pointer;transition:background .15s;}
+.user-chip:hover{background:var(--surf3);}
+.avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#ff9a5c);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;}
+.user-name{font-size:12px;font-weight:500;color:var(--text);}
+.algo-tags{display:flex;gap:6px;}
+.tag{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;padding:3px 10px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase;}
+.tag-d{background:#0D1B2A;color:#4A9EE0;border:1px solid #1C3550;}
+.tag-g{background:#1E1200;color:#E2913A;border:1px solid #3A2500;}
+
+/* ── NAV TABS ── */
+.nav-tabs{background:var(--surf);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:4px;}
+.nav-tab{padding:10px 16px;font-size:12px;font-weight:500;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--brand);border-bottom-color:var(--brand);}
+
+/* ── PAGES ── */
+.page{display:none;max-width:1200px;margin:0 auto;padding:1.5rem;}
+.page.active{display:block;}
+
+/* ── NOTIFICATIONS PANEL ── */
+.notif-panel{display:none;position:absolute;top:58px;right:1.5rem;width:340px;background:var(--surf);border:1px solid var(--border2);border-radius:var(--radius);z-index:300;overflow:hidden;}
+.notif-panel.open{display:block;}
+.notif-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.notif-header span{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.notif-clear{font-size:11px;color:var(--brand);background:none;border:none;cursor:pointer;}
+.notif-list{max-height:320px;overflow-y:auto;}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;animation:slideIn .2s ease;}
+.notif-item.unread{background:var(--surf2);}
+.notif-ico{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.notif-ico.success{background:#0D2A1A;}
+.notif-ico.warn{background:#2A1A00;}
+.notif-ico.info{background:#0D1B2A;}
+.notif-body p{font-size:12px;color:var(--text);line-height:1.4;margin-bottom:2px;}
+.notif-body span{font-size:10px;color:var(--muted);}
+.notif-empty{padding:2rem;text-align:center;color:var(--muted);font-size:12px;}
+
+/* ── USER PANEL ── */
+.user-panel{display:none;position:absolute;top:58px;right:1.5rem;width:260px;background:var(--surf);border:1px solid var(--border2);border-radius:var(--radius);z-index:300;overflow:hidden;}
+.user-panel.open{display:block;}
+.user-panel-header{padding:16px;border-bottom:1px solid var(--border);text-align:center;}
+.user-panel-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FF6B2C,#ff9a5c);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;margin:0 auto 8px;}
+.user-panel-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.user-panel-role{font-size:11px;color:var(--muted);}
+.user-panel-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
+.ups{background:var(--surf2);padding:10px;text-align:center;}
+.ups-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--brand);}
+.ups-lbl{font-size:10px;color:var(--muted);}
+.user-panel-menu{padding:8px;}
+.upm-item{padding:9px 12px;border-radius:var(--radius-xs);font-size:13px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s;}
+.upm-item:hover{background:var(--surf2);}
+.upm-item span{font-size:15px;}
+
+/* ── DASHBOARD ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
+.stat-card{background:var(--surf2);border-radius:var(--radius-sm);padding:14px 16px;}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);}
+.stat-val.green{color:var(--green);}
+.stat-val.orange{color:var(--brand);}
+.stat-val.blue{color:var(--blue);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+.section-title{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--brand);border-radius:2px;}
+
+.order-table{width:100%;border-collapse:collapse;}
+.order-table th{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;}
+.order-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);}
+.order-table tr:last-child td{border-bottom:none;}
+.order-table tr:hover td{background:var(--surf2);}
+.status-badge{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.04em;}
+.status-delivered{background:#0D2A1A;color:#2ECC71;}
+.status-transit{background:#0D1B2A;color:#4A9EE0;}
+.status-pending{background:#2A1A00;color:#F0A500;}
+.status-cancelled{background:#2A0D0D;color:#E05050;}
+
+/* ── CARD ── */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem;}
+
+/* ── LOCATION ── */
+.location-bar{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;}
+.loc-dot{width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.loc-text{font-size:12px;color:var(--text);}
+.loc-text strong{color:var(--brand);}
+.loc-refresh{margin-left:auto;background:var(--surf3);border:1px solid var(--border);border-radius:var(--radius-xs);padding:5px 10px;font-size:11px;font-weight:600;color:var(--brand);cursor:pointer;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.04em;}
+
+/* ── FORM ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+@media(max-width:580px){.form-row{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+select,input[type=text]{background:var(--surf2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-xs);padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;appearance:none;width:100%;transition:border-color .15s;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A7A82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+select:focus,input:focus{outline:none;border-color:var(--brand);}
+
+.btn{padding:9px 18px;border-radius:var(--radius-xs);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
+.btn-primary{background:var(--brand);color:#fff;}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-run{background:var(--brand);color:#fff;width:100%;padding:13px;font-size:13px;border-radius:var(--radius-sm);margin-top:.8rem;}
+.btn-run:hover{background:var(--brand-dark);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:100%;margin-top:6px;}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted);}
+
+/* ── ORDER LIST ── */
+#orderList{margin-top:.8rem;}
+.order-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);margin-bottom:7px;animation:slideIn .2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+.order-num{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--brand);min-width:56px;}
+.order-route{font-size:12px;color:var(--text);flex:1;}
+.remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all .1s;}
+.remove-btn:hover{color:var(--red);background:#2A0D0D;}
+.empty-msg{color:var(--muted);font-size:12px;text-align:center;padding:1.5rem;}
+
+/* ── AGENTS ── */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.agent-card{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.agent-av{width:34px;height:34px;border-radius:50%;background:#0D1B2A;border:2px solid #4A9EE0;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.agent-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--blue);}
+.agent-loc{font-size:10px;color:var(--muted);}
+.agent-status{font-size:10px;color:var(--green);font-weight:500;}
+
+/* ── 2-COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}}
+
+/* ── SVG MAP ── */
+.map-wrap{overflow-x:auto;border-radius:var(--radius-sm);background:var(--surf2);border:1px solid var(--border);padding:8px;}
+svg#cityMap{width:100%;min-width:420px;height:280px;}
+
+/* ── GRAPH GRID ── */
+.graph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+.graph-node{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;}
+.node-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--brand);margin-bottom:5px;}
+.node-edge{display:flex;justify-content:space-between;font-size:10px;padding:1px 0;}
+.edge-dest{color:var(--text);}
+.edge-dist{color:var(--muted);}
+
+/* ── NEARBY RESTAURANTS ── */
+.nearby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.nearby-item{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:all .2s;}
+.nearby-item:hover{border-color:var(--brand);background:var(--surf3);}
+.nearby-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);}
+.nearby-dist{font-size:11px;color:var(--green);font-weight:600;}
+
+/* ── RESULTS ── */
+.results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:.5rem;}
+.result-card{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.rc-header{padding:11px 14px;background:var(--surf3);border-bottom:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.badge{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
+.badge-agent{background:#0D1B2A;color:#4A9EE0;}
+.badge-order{background:var(--brand-dim);color:#FF9A5C;}
+.rc-body{padding:12px 14px;}
+.pr{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);gap:10px;}
+.pr:last-child{border-bottom:none;}
+.pr-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;min-width:90px;}
+.pr-val{font-size:12px;color:var(--text);text-align:right;}
+.pr-val.green{color:var(--green);font-weight:600;font-family:'Syne',sans-serif;}
+.pr-val.orange{color:var(--brand);font-weight:500;}
+
+/* ── AI TRACKER ── */
+.tracker-map{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);height:200px;position:relative;overflow:hidden;margin-bottom:1rem;}
+.tracker-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:30px 30px;}
+.tracker-road-h{position:absolute;height:3px;background:var(--surf3);left:0;right:0;}
+.tracker-road-v{position:absolute;width:3px;background:var(--surf3);top:0;bottom:0;}
+.tracker-node{position:absolute;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Syne',sans-serif;transform:translate(-50%,-50%);cursor:pointer;transition:all .3s;}
+.tracker-node.depot{background:#0D1B2A;border:2px solid #4A9EE0;color:#4A9EE0;}
+.tracker-node.rest{background:#2A1F0E;border:2px solid #E2913A;color:#E2913A;}
+.tracker-node.zone{background:#1A1F14;border:2px solid #2ECC71;color:#2ECC71;}
+.tracker-node.active{background:var(--brand);border-color:#fff;color:#fff;animation:bounce .6s ease infinite alternate;}
+@keyframes bounce{from{transform:translate(-50%,-50%) scale(1);}to{transform:translate(-50%,-50%) scale(1.15);}}
+.tracker-agent{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--brand);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;transform:translate(-50%,-50%);transition:all 1.5s ease;z-index:10;font-family:'Syne',sans-serif;}
+.tracker-lbl{position:absolute;font-size:9px;color:var(--muted);transform:translate(-50%,12px);white-space:nowrap;pointer-events:none;}
+
+.ai-insights{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.8rem;}
+.ai-insight{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;}
+.ai-insight-title{font-size:10px;font-weight:700;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ai-insight-title.green{color:var(--green);}
+.ai-insight-title.blue{color:var(--blue);}
+.ai-insight-title.orange{color:var(--brand);}
+.ai-insight-title.amber{color:var(--amber);}
+.ai-insight p{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ── ALGO INFO ── */
+.algo-explain{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:550px){.algo-explain{grid-template-columns:1fr;}}
+.algo-box{border-radius:var(--radius-xs);padding:13px 15px;}
+.algo-box.dijk{background:#0D1B2A;border:1px solid #1C3550;}
+.algo-box.grdy{background:#1E1200;border:1px solid #3A2500;}
+.algo-box-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.algo-box.dijk .algo-box-title{color:#4A9EE0;}
+.algo-box.grdy .algo-box-title{color:#E2913A;}
+.algo-box p{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ── LIVE FEED ── */
+.live-feed{max-height:220px;overflow-y:auto;}
+.feed-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);}
+.feed-item:last-child{border-bottom:none;}
+.feed-time{font-size:10px;color:var(--muted);white-space:nowrap;min-width:44px;padding-top:2px;}
+.feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.feed-dot.green{background:var(--green);}
+.feed-dot.blue{background:var(--blue);}
+.feed-dot.orange{background:var(--brand);}
+.feed-dot.red{background:var(--red);}
+.feed-msg{font-size:12px;color:var(--text);}
+
+#resultsSection{display:none;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🛵</div>
+    <div class="logo-txt">Route<span>Dash</span></div>
+  </div>
+  <div class="algo-tags">
+    <span class="tag tag-d">Dijkstra</span>
+    <span class="tag tag-g">Greedy</span>
+  </div>
+  <div class="header-right">
+    <div class="notif-btn" id="notifBtn" onclick="toggleNotif()">
+      🔔
+      <span class="notif-dot" id="notifDot"></span>
+    </div>
+    <div class="user-chip" onclick="toggleUser()">
+      <div class="avatar" id="headerAvatar">RV</div>
+      <span class="user-name" id="headerName">Radhika V.</span>
+    </div>
+  </div>
+</header>
+
+<!-- NOTIFICATIONS PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <span>Notifications</span>
+    <button class="notif-clear" onclick="clearNotifs()">Clear all</button>
+  </div>
+  <div class="notif-list" id="notifList"></div>
+</div>
+
+<!-- USER PANEL -->
+<div class="user-panel" id="userPanel">
+  <div class="user-panel-header">
+    <div class="user-panel-avatar" id="panelAvatar">RV</div>
+    <div class="user-panel-name" id="panelName">Radhika Varma</div>
+    <div class="user-panel-role">Dispatch Manager · Kurnool</div>
+  </div>
+  <div class="user-panel-stats">
+    <div class="ups"><div class="ups-val" id="upsTotalOrders">0</div><div class="ups-lbl">Orders Today</div></div>
+    <div class="ups"><div class="ups-val" id="upsTotalKm">0</div><div class="ups-lbl">Km Planned</div></div>
+  </div>
+  <div class="user-panel-menu">
+    <div class="upm-item" onclick="goTab('dashboard')"><span>📊</span> Dashboard</div>
+    <div class="upm-item" onclick="goTab('tracker')"><span>📍</span> AI Tracker</div>
+    <div class="upm-item"><span>⚙️</span> Settings</div>
+    <div class="upm-item" style="color:var(--red)" onclick="toggleUser()"><span>🚪</span> Sign Out</div>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="goTab('planner')">🗺 Planner</button>
+  <button class="nav-tab" onclick="goTab('dashboard')">📊 Dashboard</button>
+  <button class="nav-tab" onclick="goTab('tracker')">📍 AI Tracker</button>
+  <button class="nav-tab" onclick="goTab('graph')">🔗 City Graph</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PAGE: PLANNER -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page active" id="page-planner">
+
+  <!-- AI Location Bar -->
+  <div class="location-bar" id="aiLocationBar">
+    <div class="loc-dot"></div>
+    <div class="loc-text">AI Location: <strong id="locText">Detecting your location…</strong></div>
+    <button class="loc-refresh" onclick="refreshAILocation()">↻ Refresh</button>
+  </div>
+
+  <!-- Nearby Restaurants Section -->
+  <div class="card" style="margin-bottom: 1.2rem;">
+    <div class="section-title">Nearby Restaurants (AI Detected)</div>
+    <div class="nearby-grid" id="nearbyRestaurants">
+      <p class="empty-msg">Scanning for nearby restaurants...</p>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- LEFT -->
+    <div>
+      <div class="card">
+        <div class="section-title">Delivery Agents</div>
+        <div class="agents-grid" id="agentsGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">New Delivery Order</div>
+        <div class="form-row">
+          <div class="form-group">
+            <div class="form-label">Pick Up From (Nearby)</div>
+            <select id="rSel"></select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Deliver To (Zone)</div>
+            <select id="dSel"></select>
+          </div>
+          <button class="btn btn-primary" onclick="addOrder()">+ Add</button>
+        </div>
+        <div id="orderList"><p class="empty-msg">No orders yet. Add an order above.</p></div>
+        <button class="btn btn-run" onclick="runPlanner()">🚀 Plan Optimal Routes</button>
+        <button class="btn btn-ghost" onclick="clearAll()">Clear All Orders</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Algorithm Info</div>
+        <div class="algo-explain">
+          <div class="algo-box dijk">
+            <div class="algo-box-title">Dijkstra's Algorithm</div>
+            <p>Guarantees the <strong style="color:#4A9EE0">shortest path</strong> between any two Kurnool locations by exploring all routes and picking minimum distance.</p>
+          </div>
+          <div class="algo-box grdy">
+            <div class="algo-box-title">Greedy Algorithm</div>
+            <p>Assigns each order to the <strong style="color:#E2913A">nearest available agent</strong>. Makes locally optimal decisions for real-time dispatch.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: MAP + RESULTS -->
+    <div>
+      <div class="card">
+        <div class="section-title">Kurnool City Map</div>
+        <div class="map-wrap">
+          <svg id="cityMap" viewBox="0 0 460 270">
+            <g id="edgeG"></g>
+            <g id="nodeG"></g>
+          </svg>
+        </div>
+        <p style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center;">🔵 Depot · 🟠 Restaurants · 🟢 Delivery Zones · <span style="color:var(--brand)">●</span> Active route</p>
+      </div>
+
+      <div class="card" id="resultsSection">
+        <div class="section-title">Optimised Routes</div>
+        <div class="results-grid" id="results"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PAGE: DASHBOARD -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-val orange" id="dashTotal">0</div><div class="stat-sub">Today</div></div>
+    <div class="stat-card"><div class="stat-label">Delivered</div><div class="stat-val green" id="dashDelivered">0</div><div class="stat-sub">Completed</div></div>
+    <div class="stat-card"><div class="stat-label">In Transit</div><div class="stat-val blue" id="dashTransit">0</div><div class="stat-sub">Active now</div></div>
+    <div class="stat-card"><div class="stat-label">Km Optimised</div><div class="stat-val" id="dashKm">0</div><div class="stat-sub">Dijkstra savings</div></div>
+    <div class="stat-card"><div class="stat-label">Avg. Route</div><div class="stat-val" id="dashAvg">0<span style="font-size:14px;color:var(--muted)"> km</span></div><div class="stat-sub">Per delivery</div></div>
+    <div class="stat-card"><div class="stat-label">Agents Active</div><div class="stat-val green">2</div><div class="stat-sub">Online</div></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Order History</div>
+    <div style="overflow-x:auto;">
+      <table class="order-table" id="orderHistTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Restaurant</th>
+            <th>Deliver To</th>
+            <th>Agent</th>
+            <th>Distance</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="orderHistBody">
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">No orders planned yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">Live Activity Feed</div>
+      <div class="live-feed" id="liveFeed">
+        <div class="feed-item">
+          <span class="feed-time">Now</span>
+          <div class="feed-dot green"></div>
+          <span class="feed-msg">System online. Location detected: Kurnool, AP.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Agent Performance</div>
+      <div id="agentPerfGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PAGE: AI TRACKER -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-tracker">
+  <div class="card">
+    <div class="section-title">AI Location Tracker — Kurnool</div>
+    <div class="location-bar" style="margin-bottom:.8rem;">
+      <div class="loc-dot"></div>
+      <div class="loc-text">Your location: <strong id="trackerLoc">Kurnool, Andhra Pradesh</strong> · Coordinates: <strong id="trackerCoords">15.8281° N, 78.0373° E</strong></div>
+    </div>
+    <div class="tracker-map" id="trackerMap">
+      <div class="tracker-grid"></div>
+    </div>
+    <div class="ai-insights">
+      <div class="ai-insight">
+        <div class="ai-insight-title green">Fastest Corridor</div>
+        <p id="aiInsight1">Detecting optimal delivery corridors near your location…</p>
+      </div>
+      <div class="ai-insight">
+        <div class="ai-insight-title blue">Traffic Prediction</div>
+        <p id="aiInsight2">Analyzing nearby road conditions based on time of day…</p>
+      </div>
+      <div class="ai-insight">
+        <div class="ai-insight-title orange">Nearest Restaurant</div>
+        <p id="aiInsight3">Scanning restaurants within 2 km of your GPS location…</p>
+      </div>
+      <div class="ai-insight">
+        <div class="ai-insight-title amber">AI Recommendation</div>
+        <p id="aiInsight4">Processing route optimisation data…</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Nearby Locations Detected</div>
+    <div class="graph-grid" id="nearbyGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PAGE: CITY GRAPH -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-graph">
+  <div class="card">
+    <div class="section-title">All Kurnool Locations & Road Connections</div>
+    <div class="graph-grid" id="graphPanel"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Shortest Path Matrix (Dijkstra)</div>
+    <div style="overflow-x:auto;">
+      <table class="order-table" id="matrixTable" style="font-size:11px;"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  KURNOOL CITY GRAPH — Real location names
+// ════════════════════════════════════════════════════════
+const G = {
+  "Kurnool Depot":        {"Hotel Rayalaseema":2, "Sri Rama Bhavan":3, "Grand Trunk Road":4},
+  "Hotel Rayalaseema":    {"Kurnool Depot":2, "Budhawarpet":3, "Bellary Road":5},
+  "Sri Rama Bhavan":      {"Kurnool Depot":3, "Bellary Road":2, "S.P. Road":4},
+  "Srinivasa Tiffins":    {"Grand Trunk Road":2, "Bhavanasi Road":3, "Nandyal Road":5},
+  "Grand Trunk Road":     {"Kurnool Depot":4, "Srinivasa Tiffins":2, "Budhawarpet":3},
+  "Budhawarpet":          {"Hotel Rayalaseema":3, "Grand Trunk Road":3, "Bellary Road":2, "S.P. Road":3},
+  "Bellary Road":         {"Hotel Rayalaseema":5, "Sri Rama Bhavan":2, "Budhawarpet":2, "Nandyal Road":4},
+  "S.P. Road":            {"Sri Rama Bhavan":4, "Budhawarpet":3, "Bhavanasi Road":2},
+  "Bhavanasi Road":       {"Srinivasa Tiffins":3, "S.P. Road":2, "Nandyal Road":3},
+  "Nandyal Road":         {"Srinivasa Tiffins":5, "Bellary Road":4, "Bhavanasi Road":3},
+};
+
+// Node positions on SVG
+const POS = {
+  "Kurnool Depot":      {x:230, y:30},
+  "Hotel Rayalaseema":  {x:90,  y:90},
+  "Sri Rama Bhavan":    {x:230, y:90},
+  "Srinivasa Tiffins":  {x:370, y:90},
+  "Grand Trunk Road":   {x:370, y:165},
+  "Budhawarpet":        {x:90,  y:165},
+  "Bellary Road":       {x:165, y:210},
+  "S.P. Road":          {x:310, y:210},
+  "Bhavanasi Road":     {x:165, y:255},
+  "Nandyal Road":       {x:310, y:255},
+};
+
+const SHORT = {
+  "Kurnool Depot":"DEP","Hotel Rayalaseema":"H-RAY","Sri Rama Bhavan":"SRB",
+  "Srinivasa Tiffins":"S-TIF","Grand Trunk Road":"GTR","Budhawarpet":"BUD",
+  "Bellary Road":"BEL","S.P. Road":"SPR","Bhavanasi Road":"BHV","Nandyal Road":"NDL",
+};
+
+const RESTAURANTS = ["Hotel Rayalaseema","Sri Rama Bhavan","Srinivasa Tiffins"];
+const ZONES       = ["Budhawarpet","Bellary Road","S.P. Road","Bhavanasi Road","Nandyal Road","Grand Trunk Road"];
+
+// ════════════════════════════════════════════════════════
+//  DIJKSTRA
+// ════════════════════════════════════════════════════════
+function dijkstra(start){
+  const dist={}, prev={}, vis=new Set(), pq=[];
+  for(let n in G){dist[n]=Infinity; prev[n]=null;}
+  dist[start]=0; pq.push({n:start,d:0});
+  while(pq.length){
+    pq.sort((a,b)=>a.d-b.d);
+    const {n}=pq.shift();
+    if(vis.has(n)) continue; vis.add(n);
+    for(let nb in G[n]){
+      const nd=dist[n]+G[n][nb];
+      if(nd<dist[nb]){dist[nb]=nd;prev[nb]=n;pq.push({n:nb,d:nd});}
+    }
+  }
+  return {dist,prev};
+}
+function getPath(prev,end){const p=[]; let c=end; while(c!==null){p.unshift(c);c=prev[c];} return p;}
+
+const AD={},AP={};
+for(let n in G){const r=dijkstra(n);AD[n]=r.dist;AP[n]=r.prev;}
+
+// ════════════════════════════════════════════════════════
+//  GREEDY ASSIGN
+// ════════════════════════════════════════════════════════
+function greedyAssign(orders,agents){
+  const st=agents.map(a=>({...a}));
+  return orders.map(o=>{
+    let best=null,bd=Infinity;
+    st.forEach(ag=>{const d=AD[ag.loc][o.restaurant]??Infinity;if(d<bd){bd=d;best=ag;}});
+    const res={orderId:o.id,agentId:best.id,restaurant:o.restaurant,destination:o.destination,distToRest:bd};
+    best.loc=o.destination; return res;
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+const agents=[{id:"Agent 1",loc:"Kurnool Depot",orders:0,km:0},{id:"Agent 2",loc:"Kurnool Depot",orders:0,km:0}];
+let orders=[],oc=1001,notifications=[],historyOrders=[],totalKmPlanned=0;
+
+const STATUSES=["delivered","delivered","delivered","transit","pending"];
+function randStatus(){return STATUSES[Math.floor(Math.random()*STATUSES.length)];}
+function timeAgo(min){if(min<1)return"just now";if(min<60)return min+"m ago";return Math.floor(min/60)+"h ago";}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+window.onload=function(){
+  // Populate selects
+  const rs=document.getElementById("rSel"), ds=document.getElementById("dSel");
+  RESTAURANTS.forEach(r=>{const o=new Option(r,r);rs.appendChild(o);});
+  ZONES.forEach(z=>{const o=new Option(z,z);ds.appendChild(o);});
+
+  renderAgents();
+  renderGraphPanel();
+  buildMatrix();
+  drawMap([]);
+  drawTrackerMap();
+  detectLocation();
+  addNotif("info","🔵","System ready","RouteDash loaded. Location: Kurnool, AP","1m ago");
+  addNotif("success","✅","Agents online","Agent 1 & 2 checked in at Kurnool Depot","2m ago");
+  renderNotifs();
+  renderDashboard();
+  renderAgentPerf();
+  renderNearby();
+  setAIInsights();
+
+  // Close panels on outside click
+  document.addEventListener("click", e=>{
+    if(!e.target.closest("#notifBtn")&&!e.target.closest("#notifPanel")) document.getElementById("notifPanel").classList.remove("open");
+    if(!e.target.closest(".user-chip")&&!e.target.closest("#userPanel")) document.getElementById("userPanel").classList.remove("open");
+  });
+};
+
+// ════════════════════════════════════════════════════════
+//  LOCATION DETECTION
+// ════════════════════════════════════════════════════════
+function detectLocation(){
+  document.getElementById("locText").textContent="Detecting via GPS…";
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const {latitude:lat, longitude:lng}=pos.coords;
+      document.getElementById("locText").innerHTML=`<strong>Kurnool, Andhra Pradesh</strong> · ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+      document.getElementById("trackerCoords").textContent=`${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+      addNotif("success","📍","GPS Located",`Exact location: ${lat.toFixed(3)}°N, ${lng.toFixed(3)}°E`,"now");
+      renderNotifs();
+    }, _=>{
+      document.getElementById("locText").innerHTML=`<strong>Kurnool, Andhra Pradesh</strong> · 15.8281°N, 78.0373°E (estimated)`;
+    });
+  } else {
+    document.getElementById("locText").innerHTML=`<strong>Kurnool, Andhra Pradesh</strong> · 15.8281°N, 78.0373°E`;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  AI INSIGHTS
+// ════════════════════════════════════════════════════════
+function setAIInsights(){
+  setTimeout(()=>{
+    document.getElementById("aiInsight1").textContent="Budhawarpet ↔ Bellary Road corridor is fastest (2 km). Recommend routing deliveries through this path.";
+    document.getElementById("aiInsight2").textContent="Light traffic on S.P. Road & Bhavanasi Road. Avoid Nandyal Road peak 6–8 PM.";
+    document.getElementById("aiInsight3").textContent="Sri Rama Bhavan is nearest (2.3 km from Kurnool Depot). Assign priority orders here.";
+    document.getElementById("aiInsight4").textContent="Dijkstra analysis: 3-stop route via Budhawarpet saves ~1.8 km vs direct path. Use Agent 1 for Zone 1–2 cluster.";
+  },1200);
+}
+
+// ════════════════════════════════════════════════════════
+//  TRACKER MAP
+// ════════════════════════════════════════════════════════
+function drawTrackerMap(){
+  const map=document.getElementById("trackerMap");
+  // Roads
+  [[25,40,"h"],[95,40,"h"],[55,20,"v"],[55,80,"v"]]
+  .forEach(([top_left,size,dir])=>{});
+  [35,95,155].forEach(pct=>{
+    const d=document.createElement("div");
+    d.className="tracker-road-h";
+    d.style.top=pct+"%";
+    map.appendChild(d);
+  });
+  [20,50,80].forEach(pct=>{
+    const d=document.createElement("div");
+    d.className="tracker-road-v";
+    d.style.left=pct+"%";
+    map.appendChild(d);
+  });
+
+  // Nodes on tracker map (percentage positions)
+  const tPos={
+    "Kurnool Depot":{l:50,t:18},
+    "Hotel Rayalaseema":{l:20,t:33},
+    "Sri Rama Bhavan":{l:50,t:33},
+    "Srinivasa Tiffins":{l:80,t:33},
+    "Budhawarpet":{l:20,t:60},
+    "Bellary Road":{l:36,t:78},
+    "S.P. Road":{l:65,t:78},
+    "Nandyal Road":{l:65,t:95},
+  };
+
+  for(const [name,p] of Object.entries(tPos)){
+    let cls="zone";
+    if(name==="Kurnool Depot") cls="depot";
+    else if(RESTAURANTS.includes(name)) cls="rest";
+
+    const node=document.createElement("div");
+    node.className=`tracker-node ${cls}`;
+    node.style.left=p.l+"%"; node.style.top=p.t+"%";
+    node.textContent=SHORT[name]||name.slice(0,3);
+    node.title=name;
+    map.appendChild(node);
+
+    const lbl=document.createElement("div");
+    lbl.className="tracker-lbl";
+    lbl.style.left=p.l+"%"; lbl.style.top=p.t+"%";
+    lbl.textContent=name;
+    map.appendChild(lbl);
+  }
+
+  // Agents
+  ["A1","A2"].forEach((label,i)=>{
+    const ag=document.createElement("div");
+    ag.className="tracker-agent";
+    ag.id="tagent"+(i+1);
+    ag.style.left="50%"; ag.style.top="18%";
+    ag.textContent=label;
+    map.appendChild(ag);
+  });
+}
+
+function animateAgentOnTracker(agentIdx,path){
+  const tPos={"Kurnool Depot":{l:50,t:18},"Hotel Rayalaseema":{l:20,t:33},"Sri Rama Bhavan":{l:50,t:33},"Srinivasa Tiffins":{l:80,t:33},"Budhawarpet":{l:20,t:60},"Bellary Road":{l:36,t:78},"S.P. Road":{l:65,t:78},"Nandyal Road":{l:65,t:95}};
+  const el=document.getElementById("tagent"+(agentIdx+1));
+  if(!el) return;
+  path.forEach((node,i)=>{
+    setTimeout(()=>{
+      const p=tPos[node];
+      if(p){el.style.left=p.l+"%"; el.style.top=p.t+"%";}
+    }, i*1600);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  NEARBY GRID
+// ════════════════════════════════════════════════════════
+function renderNearby(){
+  const nearby=[
+    {name:"Hotel Rayalaseema",type:"Restaurant",dist:"2.1 km",open:true},
+    {name:"Sri Rama Bhavan",type:"Restaurant",dist:"2.8 km",open:true},
+    {name:"Srinivasa Tiffins",type:"Restaurant",dist:"3.5 km",open:false},
+    {name:"Budhawarpet Market",type:"Zone",dist:"1.4 km",open:true},
+    {name:"Bellary Road",type:"Zone",dist:"3.2 km",open:true},
+    {name:"S.P. Road",type:"Zone",dist:"2.6 km",open:true},
+    {name:"Bhavanasi Road",type:"Zone",dist:"4.1 km",open:true},
+    {name:"Nandyal Road",type:"Zone",dist:"5.0 km",open:true},
+    {name:"Grand Trunk Road",type:"Zone",dist:"3.8 km",open:true},
+  ];
+  const grid=document.getElementById("nearbyGrid");
+  grid.innerHTML=nearby.map(n=>`
+    <div class="graph-node">
+      <div class="node-name">${n.name}</div>
+      <div class="node-edge"><span class="edge-dest">${n.type}</span><span class="edge-dist" style="color:${n.type==="Restaurant"?"var(--amber)":"var(--green)"}">${n.type==="Restaurant"?"🍽":"📍"}</span></div>
+      <div class="node-edge"><span class="edge-dest">Distance</span><span class="edge-dist">${n.dist}</span></div>
+      <div class="node-edge"><span class="edge-dest">Status</span><span class="edge-dist" style="color:${n.open?"var(--green)":"var(--red)"}">${n.open?"Open":"Closed"}</span></div>
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  GRAPH PANEL
+// ════════════════════════════════════════════════════════
+function renderGraphPanel(){
+  document.getElementById("graphPanel").innerHTML=Object.entries(G).map(([node,edges])=>`
+    <div class="graph-node">
+      <div class="node-name">${node}</div>
+      ${Object.entries(edges).map(([d,w])=>`<div class="node-edge"><span class="edge-dest">${d}</span><span class="edge-dist">${w} km</span></div>`).join("")}
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  DISTANCE MATRIX
+// ════════════════════════════════════════════════════════
+function buildMatrix(){
+  const nodes=Object.keys(G);
+  const t=document.getElementById("matrixTable");
+  let html=`<thead><tr><th>From \\ To</th>${nodes.map(n=>`<th>${SHORT[n]||n}</th>`).join("")}</tr></thead><tbody>`;
+  nodes.forEach(from=>{
+    html+=`<tr><td style="font-weight:600;color:var(--brand)">${SHORT[from]||from}</td>`;
+    nodes.forEach(to=>{
+      const d=AD[from][to];
+      const v=d===Infinity?"∞":d;
+      const hl=from===to?"color:var(--muted)":d<=3?"color:var(--green)":d<=5?"color:var(--amber)":"color:var(--text)";
+      html+=`<td style="${hl};text-align:center">${v}</td>`;
+    });
+    html+="</tr>";
+  });
+  html+="</tbody>";
+  t.innerHTML=html;
+}
+
+// ════════════════════════════════════════════════════════
+//  SVG MAP
+// ════════════════════════════════════════════════════════
+function drawMap(hlPath){
+  const NS="http://www.w3.org/2000/svg";
+  const eG=document.getElementById("edgeG"), nG=document.getElementById("nodeG");
+  eG.innerHTML=""; nG.innerHTML="";
+  const drawn=new Set();
+  for(const from in G){
+    for(const to in G[from]){
+      const key=[from,to].sort().join("|");
+      if(drawn.has(key)) continue; drawn.add(key);
+      const p1=POS[from],p2=POS[to];
+      const isHL=hlPath.length>1&&hlPath.some((n,i)=>i<hlPath.length-1&&((hlPath[i]===from&&hlPath[i+1]===to)||(hlPath[i]===to&&hlPath[i+1]===from)));
+      const line=document.createElementNS(NS,"line");
+      line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);
+      line.setAttribute("stroke",isHL?"#FF6B2C":"#2A2A2E");line.setAttribute("stroke-width",isHL?"3":"1.5");
+      eG.appendChild(line);
+      const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
+      const lbl=document.createElementNS(NS,"text");
+      lbl.setAttribute("x",mx);lbl.setAttribute("y",my-4);
+      lbl.setAttribute("font-size","9");lbl.setAttribute("fill","#555558");lbl.setAttribute("text-anchor","middle");
+      lbl.setAttribute("font-family","DM Sans,sans-serif");
+      lbl.textContent=G[from][to]+"km";
+      eG.appendChild(lbl);
+    }
+  }
+  for(const name in POS){
+    const {x,y}=POS[name]; const isHL=hlPath.includes(name);
+    let fill,stroke,txtFill;
+    if(isHL){fill="#FF6B2C";stroke="#fff";txtFill="#fff";}
+    else if(name==="Kurnool Depot"){fill="#0D1B2A";stroke="#4A9EE0";txtFill="#4A9EE0";}
+    else if(RESTAURANTS.includes(name)){fill="#2A1F0E";stroke="#E2913A";txtFill="#E2913A";}
+    else{fill="#1A1F14";stroke="#2ECC71";txtFill="#2ECC71";}
+    const g=document.createElementNS(NS,"g");
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",16);
+    c.setAttribute("fill",fill);c.setAttribute("stroke",stroke);c.setAttribute("stroke-width","2");
+    g.appendChild(c);
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",x);t.setAttribute("y",y+4);
+    t.setAttribute("font-size","9");t.setAttribute("font-weight","700");t.setAttribute("fill",txtFill);
+    t.setAttribute("text-anchor","middle");t.setAttribute("font-family","Syne,sans-serif");
+    t.textContent=SHORT[name]||name.slice(0,3);
+    g.appendChild(t);
+    nG.appendChild(g);
+    const nl=document.createElementNS(NS,"text");
+    nl.setAttribute("x",x);nl.setAttribute("y",y+26);
+    nl.setAttribute("font-size","8");nl.setAttribute("fill","#555558");nl.setAttribute("text-anchor","middle");
+    nl.setAttribute("font-family","DM Sans,sans-serif");
+    nl.textContent=name.length>14?name.slice(0,13)+"…":name;
+    eG.appendChild(nl);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  AGENTS
+// ════════════════════════════════════════════════════════
+function renderAgents(){
+  document.getElementById("agentsGrid").innerHTML=agents.map(a=>`
+    <div class="agent-card">
+      <div class="agent-av">🏍️</div>
+      <div>
+        <div class="agent-name">${a.id}</div>
+        <div class="agent-loc">📍 ${a.loc}</div>
+        <div class="agent-status">● Online · ${a.orders} orders</div>
+      </div>
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  ADD ORDER
+// ════════════════════════════════════════════════════════
+function addOrder(){
+  const rest=document.getElementById("rSel").value;
+  const dest=document.getElementById("dSel").value;
+  const id="ORD-"+oc++;
+  orders.push({id,restaurant:rest,destination:dest});
+  renderOrders();
+}
+
+function renderOrders(){
+  const list=document.getElementById("orderList");
+  if(!orders.length){list.innerHTML='<p class="empty-msg">No orders yet. Add an order above.</p>';return;}
+  list.innerHTML=orders.map((o,i)=>`
+    <div class="order-item">
+      <span class="order-num">${o.id}</span>
+      <span class="order-route">${o.restaurant} → ${o.destination}</span>
+      <button class="remove-btn" onclick="removeOrder(${i})">✕</button>
+    </div>`).join("");
+}
+function removeOrder(i){orders.splice(i,1);renderOrders();}
+
+// ════════════════════════════════════════════════════════
+//  RUN PLANNER
+// ════════════════════════════════════════════════════════
+function runPlanner(){
+  if(!orders.length){addNotif("warn","⚠️","No orders","Add at least one order before planning.","now");renderNotifs();showNotifBadge();return;}
+  const agCopy=agents.map(a=>({...a,loc:"Kurnool Depot"}));
+  const assignments=greedyAssign(orders,agCopy);
+  const res=document.getElementById("results");
+  res.innerHTML="";
+  let firstPath=[], totalKm=0;
+  assignments.forEach((a,i)=>{
+    const p1=getPath(AP["Kurnool Depot"],a.restaurant);
+    const p2=getPath(AP[a.restaurant],a.destination);
+    const full=[...p1,...p2.slice(1)];
+    if(i===0) firstPath=full;
+    const total=(AD["Kurnool Depot"][a.restaurant]||0)+(AD[a.restaurant][a.destination]||0);
+    totalKm+=total;
+    const status=randStatus();
+    historyOrders.push({id:a.orderId,restaurant:a.restaurant,dest:a.destination,agent:a.agentId,dist:total,status,time:new Date()});
+    agents.find(ag=>ag.id===a.agentId).orders++;
+    agents.find(ag=>ag.id===a.agentId).km+=total;
+    res.innerHTML+=`
+      <div class="result-card">
+        <div class="rc-header">
+          <span class="badge badge-agent">${a.agentId}</span>
+          <span class="badge badge-order">${a.orderId}</span>
+          <span class="status-badge status-transit" style="margin-left:auto">In Transit</span>
+        </div>
+        <div class="rc-body">
+          <div class="pr"><span class="pr-label">Dijkstra Path</span><span class="pr-val orange" style="font-size:11px;">${full.join(" → ")}</span></div>
+          <div class="pr"><span class="pr-label">Total Distance</span><span class="pr-val green">${total} km</span></div>
+          <div class="pr"><span class="pr-label">Restaurant</span><span class="pr-val">${a.restaurant}</span></div>
+          <div class="pr"><span class="pr-label">Deliver To</span><span class="pr-val">${a.destination}</span></div>
+          <div class="pr"><span class="pr-label">Pick-up Dist.</span><span class="pr-val">${a.distToRest} km</span></div>
+        </div>
+      </div>`;
+    addFeedItem(status==="delivered"?"green":"blue", status==="delivered"?"green":"blue",`${a.orderId} assigned to ${a.agentId} via ${a.restaurant}`);
+    addNotif("success","🛵",`Route planned: ${a.orderId}`,`${a.agentId} → ${a.restaurant} → ${a.destination} (${total} km)`,"now");
+    // animate agent on tracker
+    if(i<2) animateAgentOnTracker(i, full);
+  });
+  totalKmPlanned+=totalKm;
+  drawMap(firstPath);
+  agCopy.forEach((a,i)=>{agents[i].loc=a.loc;});
+  renderAgents();
+  renderNotifs(); showNotifBadge();
+  renderDashboard();
+  renderAgentPerf();
+  document.getElementById("resultsSection").style.display="block";
+  document.getElementById("resultsSection").scrollIntoView({behavior:"smooth"});
+}
+
+// ════════════════════════════════════════════════════════
+//  CLEAR
+// ════════════════════════════════════════════════════════
+function clearAll(){
+  orders=[]; oc=1001;
+  agents.forEach(a=>{a.loc="Kurnool Depot";});
+  renderOrders(); renderAgents(); drawMap([]);
+  document.getElementById("results").innerHTML="";
+  document.getElementById("resultsSection").style.display="none";
+}
+
+// ════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════
+function renderDashboard(){
+  const total=historyOrders.length;
+  const delivered=historyOrders.filter(o=>o.status==="delivered").length;
+  const transit=historyOrders.filter(o=>o.status==="transit").length;
+  const km=historyOrders.reduce((s,o)=>s+o.dist,0);
+  const avg=total?Math.round(km/total):0;
+  document.getElementById("dashTotal").textContent=total;
+  document.getElementById("dashDelivered").textContent=delivered;
+  document.getElementById("dashTransit").textContent=transit;
+  document.getElementById("dashKm").textContent=km;
+  document.getElementById("dashAvg").innerHTML=avg+'<span style="font-size:14px;color:var(--muted)"> km</span>';
+  document.getElementById("upsTotalOrders").textContent=total;
+  document.getElementById("upsTotalKm").textContent=km;
+
+  const body=document.getElementById("orderHistBody");
+  if(!historyOrders.length){
+    body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">No orders planned yet.</td></tr>';
+    return;
+  }
+  body.innerHTML=[...historyOrders].reverse().map(o=>`
+    <tr>
+      <td style="font-family:'Syne',sans-serif;font-size:11px;color:var(--brand)">${o.id}</td>
+      <td>${o.restaurant}</td>
+      <td>${o.dest}</td>
+      <td style="color:var(--blue)">${o.agent}</td>
+      <td style="color:var(--green)">${o.dist} km</td>
+      <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+    </tr>`).join("");
+}
+
+function renderAgentPerf(){
+  const grid=document.getElementById("agentPerfGrid");
+  grid.innerHTML=agents.map(a=>`
+    <div class="agent-card" style="margin-bottom:8px;">
+      <div class="agent-av">🏍️</div>
+      <div style="flex:1">
+        <div class="agent-name">${a.id}</div>
+        <div class="agent-loc">📍 ${a.loc}</div>
+        <div style="display:flex;gap:12px;margin-top:4px;">
+          <span style="font-size:10px;color:var(--muted)">Orders: <strong style="color:var(--text)">${a.orders}</strong></span>
+          <span style="font-size:10px;color:var(--muted)">Total: <strong style="color:var(--green)">${a.km} km</strong></span>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  NOTIFICATIONS
+// ════════════════════════════════════════════════════════
+function addNotif(type,ico,title,body,time){
+  notifications.unshift({type,ico,title,body,time,unread:true});
+  if(notifications.length>20) notifications.pop();
+}
+function renderNotifs(){
+  const list=document.getElementById("notifList");
+  if(!notifications.length){list.innerHTML='<div class="notif-empty">No notifications</div>';return;}
+  list.innerHTML=notifications.map((n,i)=>`
+    <div class="notif-item ${n.unread?'unread':''}" onclick="markRead(${i})">
+      <div class="notif-ico ${n.type}">${n.ico}</div>
+      <div class="notif-body"><p><strong>${n.title}</strong> — ${n.body}</p><span>${n.time}</span></div>
+    </div>`).join("");
+}
+function markRead(i){notifications[i].unread=false;renderNotifs();updateNotifDot();}
+function clearNotifs(){notifications=[];renderNotifs();document.getElementById("notifDot").style.display="none";}
+function showNotifBadge(){document.getElementById("notifDot").style.display="block";}
+function updateNotifDot(){const unread=notifications.some(n=>n.unread);document.getElementById("notifDot").style.display=unread?"block":"none";}
+function toggleNotif(){
+  document.getElementById("notifPanel").classList.toggle("open");
+  document.getElementById("userPanel").classList.remove("open");
+  notifications.forEach(n=>n.unread=false);
+  setTimeout(()=>{updateNotifDot();renderNotifs();},300);
+}
+function toggleUser(){
+  document.getElementById("userPanel").classList.toggle("open");
+  document.getElementById("notifPanel").classList.remove("open");
+}
+
+// ════════════════════════════════════════════════════════
+//  LIVE FEED
+// ════════════════════════════════════════════════════════
+function addFeedItem(dotClass,_,msg){
+  const feed=document.getElementById("liveFeed");
+  const now=new Date();
+  const t=now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
+  const item=document.createElement("div");
+  item.className="feed-item";
+  item.innerHTML=`<span class="feed-time">${t}</span><div class="feed-dot ${dotClass}"></div><span class="feed-msg">${msg}</span>`;
+  feed.insertBefore(item,feed.firstChild);
+}
+
+// ════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════
+function goTab(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("page-"+id).classList.add("active");
+  const idx={"planner":0,"dashboard":1,"tracker":2,"graph":3}[id];
+  document.querySelectorAll(".nav-tab")[idx].classList.add("active");
+  document.getElementById("userPanel").classList.remove("open");
+  if(id==="dashboard") renderDashboard();
+}
+</script>
+</body>
+</html>
